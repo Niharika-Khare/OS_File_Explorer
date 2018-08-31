@@ -6,12 +6,10 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <stack>
-#include <vector>
 #define gotoxy(x,y) printf("\033[%d;%dH",(x),(y))
 using namespace std;
 
 stack <struct dirent> dir_struct;
-vector <struct dirent *> directories; 
 struct termios canon_to_NC()
 {
 	struct termios old_terminal;
@@ -30,30 +28,11 @@ void NC_to_canon(struct termios term_p)
 	tcsetattr( 1 , TCSANOW, &term_p);
 }
 
-int list_display(DIR *cur_dir,const char * path)
-{
-	struct dirent *next_dir;
-	cur_dir = opendir (path); 
-	int sno = 0;
-	if (cur_dir != NULL)
-	{
-		while ( (next_dir=readdir(cur_dir) ) && sno <=19 )
-		{
-			struct stat file_info;
-			directories.push_back(next_dir);
-			stat(directories[sno-1]->d_name,&file_info);
-			printf("\t%2d%-9s", ++sno,".");
-			printf("%-40s", directories[sno-1]->d_name);
-			printf("%-40ld", file_info.st_size);
-			printf("%-40o", file_info.st_mode & 0777 );
-			printf("%s", ctime(&file_info.st_mtime));
-	    }
-	    closedir(cur_dir);
-	}
-	else
-		printf("Directory Not Found!");
- 	return 1;
-}
+ //int list_display(DIR *cur_dir,const char * path)
+// {
+
+// 	return 1;
+// }
 
 int main ()
 {
@@ -64,7 +43,25 @@ int main ()
 	struct termios old_terminal = canon_to_NC();
 	DIR *cur_dir;
 	const char * path = "../";
-	list_display(cur_dir,path);
+	struct dirent *next_dir;
+	cur_dir = opendir ("../"); //put proper path
+	int sno = 0;
+	if (cur_dir != NULL)
+	{
+		while ( (next_dir=readdir(cur_dir) ) && sno <=19 )
+		{
+			struct stat file_info;
+			stat(next_dir->d_name,&file_info);
+			printf("\t%2d%-9s", ++sno,".");
+			printf("%-40s", next_dir->d_name);
+			printf("%-40ld", file_info.st_size);
+			printf("%-40o", file_info.st_mode & 0777 );
+			printf("%s", ctime(&file_info.st_mtime));
+	    }
+	    closedir(cur_dir);
+	}
+	else
+		printf("Directory Not Found!");
 	printf("_________________________________________________________________________________________________________________________________________________________________________\n");
 	printf("_________________________________________________________________________________________________________________________________________________________________________\n\n");
 	while(1) {
@@ -76,10 +73,10 @@ int main ()
 		c = getchar();		
 		if( c ==';' || c == 'q' )
 			break;		
-		else if( c== 10 )
-		{
-		 	printf("zvzdfgv");
-		}
+		// else if( c== 10 )
+		// {
+		// 	printf("zvzdfgv");
+		// }
 		else if( c == '\033')
 			if(getchar() == '[')
 			{	
